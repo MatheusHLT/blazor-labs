@@ -1,0 +1,75 @@
+@page "/dragonballapi"
+@rendermode InteractiveWebAssembly
+@using ProjetoFinal.Client.Models.DragonballApi
+@inject HttpClient Http
+
+<PageTitle>Dragonball Api</PageTitle>
+
+<h2>Consumer API Dragonball</h2>
+
+<div class="mb-3">
+    <label for="cepInput" class="form-label">Digite um ID:</label>
+    <input type="text" id="cepInput" class="form-control" @bind="id" />
+</div>
+<button class="btn btn-primary" @onclick="ConsultarCep">Consultar</button>
+
+@if (root != null)
+{
+    <div class="mt-3">
+        <p><h4>=== Informações do Personagem ===</h4></p>
+        <p><strong>Nome:</strong> @root.name</p>
+        <p><strong>Planeta:</strong> @(root.originPlanet?.name ?? "Desconhecido")</p>
+        <p><strong>Transformações:</strong></p>
+        @if (root.transformations != null && root.transformations.Any())
+        {
+            <ul>
+                @foreach (var trans in root.transformations)
+                {
+                    <li>@trans.name</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>Nenhuma transformação encontrada.</p>
+        }
+        <h4>================================</h4>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+        <div class="alert alert-danger mt-3">@errorMessage</div>
+}
+
+@code {
+    private string id;
+    private Root root;
+    private string errorMessage;
+
+    private async Task ConsultarCep()
+    {
+        errorMessage = string.Empty;
+        root = null;
+
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            errorMessage = "Por favor insira um ID válido.";
+            return;
+        }
+
+        try
+        {
+            var url = $"https://dragonball-api.com/api/characters/{id}";
+            root = await Http.GetFromJsonAsync<Root>(url);
+
+            if (root == null || root.id == 0)
+            {
+                errorMessage = "ID não encontrado";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ocorreu um erro: {ex.Message}";
+        }
+    }
+}
