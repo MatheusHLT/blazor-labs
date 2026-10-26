@@ -1,0 +1,74 @@
+@page "/pokeapi"
+@rendermode InteractiveWebAssembly
+@using ProjetoFinal.Client.Models
+@inject HttpClient Http
+
+<PageTitle>Buscar Pokémon</PageTitle>
+
+<h1>Buscar Pokémon</h1>
+
+<div class="mb-3">
+    <label for="pokemonName">Nome do Pokémon:</label>
+    <input id="pokemonName" class="form-control" style="max-width: 400px;" @bind="searchName" placeholder="Digite o nome do Pokémon (ex: ditto)" />
+</div>
+
+<button class="btn btn-primary" @onclick="BuscarPokemon">Buscar Pokémon</button>
+
+@if (isLoading)
+{
+    <p class="mt-3"><em>Carregando...</em></p>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="mt-3 text-danger">@errorMessage</p>
+}
+else if (pokemon != null)
+{
+    <div class="mt-4">
+        <h2>Detalhes do Pokémon</h2>
+        
+        <img src="@pokemon.Sprites.Other.OfficialArtwork.FrontDefault" alt="@pokemon.Name" style="max-width: 200px;" />
+        
+        <p><strong>ID:</strong> @pokemon.Id</p>
+        <p><strong>Nome:</strong> @pokemon.Name</p>
+        <p><strong>Altura:</strong> @(pokemon.Height / 10.0) m</p>
+        <p><strong>Peso:</strong> @(pokemon.Weight / 10.0) kg</p>
+    </div>
+}
+
+@code {
+    private string searchName = string.Empty;
+    private Pokemon? pokemon;
+    private bool isLoading = false;
+    private string? errorMessage;
+
+    private async Task BuscarPokemon()
+    {
+        if (string.IsNullOrWhiteSpace(searchName))
+        {
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = null;
+        pokemon = null;
+
+        try
+        {
+            string url = $"https://pokeapi.co/api/v2/pokemon/{searchName.ToLower().Trim()}";
+            pokemon = await Http.GetFromJsonAsync<Pokemon>(url);
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "Pokémon não encontrado. Verifique o nome digitado.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ocorreu um erro: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
