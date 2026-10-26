@@ -1,0 +1,122 @@
+@page "/brasilapicep"
+@rendermode InteractiveWebAssembly
+@using ProjetoFinal.Client.Models.BrasilApiCep
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<PageTitle>Buscar CEP</PageTitle>
+
+<h1>Consulta de CEP - BrasilAPI</h1>
+
+<div class="row mb-3">
+    <div class="col-md-5">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Digite o CEP (apenas números)" @bind="cepInput"
+                   maxlength="8" />
+            <button class="btn btn-primary" @onclick="BuscarCep" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span> Buscando...</span>
+                }
+                else
+                {
+                    <span>Buscar</span>
+                }
+            </button>
+        </div>
+        <small class="text-muted">Ex: 89010025</small>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+@if (resultadoCep != null)
+{
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header bg-success text-white">
+            Resultado para o CEP: <strong>@resultadoCep.cep</strong>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Logradouro:</strong> @resultadoCep.street</p>
+                    <p><strong>Bairro:</strong> @resultadoCep.neighborhood</p>
+                    <p><strong>Cidade/UF:</strong> @resultadoCep.city / @resultadoCep.state</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Fuso Horário:</strong> @resultadoCep.timezoneName</p>
+                    @if (resultadoCep.ibge != null)
+                    {
+                        <p><strong>Código IBGE (Município):</strong> @resultadoCep.ibge.city</p>
+                    }
+                    @if (resultadoCep.location?.coordinates != null)
+                    {
+                        <p>
+                            <strong>Coordenadas:</strong>
+                            Lat @resultadoCep.location.coordinates.latitude,
+                            Lon @resultadoCep.location.coordinates.longitude
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string cepInput = string.Empty;
+    private Cep? resultadoCep;
+    private bool isLoading = false;
+    private string errorMessage = string.Empty;
+
+    private async Task BuscarCep()
+    {
+        // Limpa formatação básica caso o usuário digite com hífen
+        var cepLimpo = cepInput.Replace("-", "").Trim();
+
+        if (string.IsNullOrWhiteSpace(cepLimpo) || cepLimpo.Length != 8)
+        {
+            errorMessage = "Por favor, informe um CEP válido com 8 dígitos.";
+            resultadoCep = null;
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = string.Empty;
+        resultadoCep = null;
+
+        try
+        {
+            // O endpoint V2 retorna os dados extras de coordenadas e IBGE presentes no seu modelo
+            string url = $"https://brasilapi.com.br/api/cep/v2/{cepLimpo}";
+            
+            resultadoCep = await Http.GetFromJsonAsync<Cep>(url);
+        }
+        catch (HttpRequestException ex)
+        {
+            // A BrasilAPI retorna 404 quando o CEP não existe na base
+            if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                errorMessage = "CEP não encontrado ou inexistente.";
+            }
+            else
+            {
+                errorMessage = $"Erro de comunicação com a API: {ex.Message}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ocorreu um erro inesperado: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
