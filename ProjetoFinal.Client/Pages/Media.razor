@@ -1,0 +1,102 @@
+@page "/media"
+@rendermode InteractiveWebAssembly
+
+<div class="container mt-5">
+    <div class="card shadow mx-auto" style="max-width: 500px; border-radius: 12px;">
+        
+        @* Cabeçalho do Card *@
+        <div class="card-header bg-primary text-white text-center" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+            <h3 class="mb-1 fw-bold">Calcular Média</h3>
+            @* 💡 ADICIONADO: Etiqueta indicando a regra de aprovação *@
+            <span style="background-color:rgb(34, 0, 255)" class="badge text-white text-primary fw-bold px-3 py-2 mt-1 shadow-sm">
+                Média para Aprovação: 7.0
+            </span>
+        </div>
+
+        @* Corpo do Card *@
+        <div class="card-body p-4">
+            
+            @* Campo Nota 1 *@
+            <div class="mb-3">
+                <label for="nota1" class="form-label fw-semibold text-secondary">Digite a Nota 1:</label>
+                <input id="nota1" type="number" class="form-control form-control-lg" @bind="nota1" placeholder="0.0" min="0" max="10" step="0.1" />
+            </div>
+
+            @* Campo Nota 2 *@
+            <div class="mb-4">
+                <label for="nota2" class="form-label fw-semibold text-secondary">Digite a Nota 2:</label>
+                <input id="nota2" type="number" class="form-control form-control-lg" @bind="nota2" placeholder="0.0" min="0" max="10" step="0.1" />
+            </div>
+
+            @* Botão de Ação *@
+            <div class="d-grid mb-4">
+                <button class="btn btn-primary btn-lg fw-bold shadow-sm" @onclick="CalcularMedia">
+                    Calcular Média
+                </button>
+            </div>
+
+            @* Painel de Resultado *@
+            @if (media != null || !string.IsNullOrEmpty(situação))
+            {
+                <div class="border-top pt-3 text-center">
+                    
+                    @if (media != null)
+                    {
+                        <h4 class="text-secondary mb-2">
+                            Média do Aluno: <span class="text-dark fw-bold">@media?.ToString("F1")</span>
+                        </h4>
+                    }
+
+                    @* Alertas Inteligentes baseados na situação *@
+                    @if (situação == "Aprovado!")
+                    {
+                        <div class="alert alert-success fw-bold m-0" role="alert">
+                            🎉 @situação
+                        </div>
+                    }
+                    else if (situação == "Reprovado!")
+                    {
+                        <div class="alert alert-danger fw-bold m-0" role="alert">
+                            ❌ @situação
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(situação))
+                    {
+                        <div class="alert alert-warning fw-bold m-0" role="alert">
+                            ⚠️ @situação
+                        </div>
+                    }
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private double nota1;
+    private double nota2;
+    private double? media;
+    private string situação = "";
+
+    private void CalcularMedia()
+    {
+        if (nota1 < 0 || nota1 > 10 || nota2 < 0 || nota2 > 10)
+        {
+            media = null;
+            situação = "Digite notas válidas entre 0 e 10!";
+            return;
+        }
+
+        media = (nota1 + nota2) / 2;
+
+        if (media >= 7.0)
+        {
+            situação = "Aprovado!";
+        }
+        else
+        {
+            situação = "Reprovado!";
+        }
+    }
+}
