@@ -1,0 +1,94 @@
+@page "/tarefas"
+@rendermode InteractiveWebAssembly
+
+<h1>Lista de Tarefas</h1>
+
+<input @bind="novaTarefa" placeholder="Digite uma tarefa" />
+<button @onclick="AdicionarTarefa">Adicionar</button>
+<button @onclick="LimparTudo">Limpar Tudo</button>
+
+@if (!string.IsNullOrEmpty(erro))
+{
+    <p style="color: red;">@erro</p>
+}
+
+<ul>
+    @foreach (var tarefa in tarefas)
+    {
+        <li>
+            @tarefa 
+            <button @onclick="() => RemoverTarefa(tarefa)">X</button>
+        </li>
+    }
+</ul>
+
+<p>@ResumoTarefas()</p>
+<p>Total de letras em todas as tarefas: @TotalDeLetras()</p>
+
+@code {
+    List<string> tarefas = new List<string>();
+    string novaTarefa = "";
+    string erro = "";
+
+    bool TarefaValida(string texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+        {
+            return false;
+        }
+
+        return !tarefas.Contains(texto.Trim());
+    }
+
+    void AdicionarTarefa()
+    {
+        if (TarefaValida(novaTarefa))
+        {
+            tarefas.Add(novaTarefa.Trim());
+            novaTarefa = "";
+            erro = ""; 
+        }
+        else
+        {
+            erro = "Tarefa vazia ou repetida.";
+        }
+    }
+
+    string Pluralizar(int quantidade)
+    {
+        return quantidade == 1 ? "tarefa" : "tarefas";
+    }
+
+    string ResumoTarefas()
+    {
+        if (tarefas.Count == 0)
+        {
+            return "Nenhuma tarefa ainda.";
+        }
+        else
+        {
+            return $"Você tem {tarefas.Count} {Pluralizar(tarefas.Count)}.";
+        }
+    }
+
+    void RemoverTarefa(string tarefa)
+    {
+        tarefas.Remove(tarefa);
+    }
+
+    void LimparTudo()
+    {
+        tarefas.Clear();
+        erro = "";
+    }
+
+    int TotalDeLetras()
+    {
+        int total = 0;
+        foreach (var tarefa in tarefas)
+        {
+            total += tarefa.Length;
+        }
+        return total;
+    }
+}

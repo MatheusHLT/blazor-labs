@@ -1,0 +1,23 @@
+@page "/sorteio"
+@rendermode InteractiveWebAssembly
+
+<div class="text-center mx-auto" style="max-width: 600px;">
+<h1>SORTEIO!</h1>
+
+<div class="mb-3">
+<button @onclick="SorteiaNumero">CLIQUE AQUI PARA SORTEAR NUMERO DE 1 A 100</button>
+</div>
+
+<h2>O NUMERO SORTEADO É:</h2>
+<h3><span style="color: red"; fw-bold">@numeroSorteado</span></h3>
+</div>
+
+@code {
+    private int? numeroSorteado;
+    private System.Random Gerador = new System.Random();
+
+    private void SorteiaNumero()
+    {
+        numeroSorteado = Gerador.Next(1, 100);
+    }
+}
