@@ -1,0 +1,71 @@
+@page "/valorantapi"
+@rendermode InteractiveWebAssembly
+@using SearchAgentValorantAPI.Models
+@inject HttpClient Http
+
+<h3>Buscar Agente VALORANT</h3>
+
+<div class="mb-3">
+    <label for="uuidInput" class="form-label">UUID do Agente:</label>
+    <input id="uuidInput" class="form-control" @bind="agentUuid" placeholder="Insira o UUID do agente..." />
+</div>
+
+<button class="btn btn-primary mb-4" @onclick="BuscarAgente">Buscar Agente</button>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@if (agentData != null)
+{
+    <div class="agent-card mt-3">
+        <h2>@agentData.displayName</h2>
+        
+        @if (!string.IsNullOrEmpty(agentData.fullPortrait))
+        {
+            <div class="my-3">
+                <img src="@agentData.fullPortrait" alt="@agentData.displayName" style="max-height: 400px; object-fit: contain;" />
+            </div>
+        }
+
+        <p class="lead">@agentData.description</p>
+    </div>
+}
+
+@code {
+    private string agentUuid = "e370fa57-4757-3604-3648-499e1f642d3f"; // Padrão com o UUID do Gekko
+    private Data? agentData;
+    private string? errorMessage;
+
+    private async Task BuscarAgente()
+    {
+        errorMessage = null;
+        agentData = null;
+
+        if (string.IsNullOrWhiteSpace(agentUuid))
+        {
+            errorMessage = "Por favor, digite um UUID válido.";
+            return;
+        }
+
+        try
+        {
+            var url = $"https://valorant-api.com/v1/agents/{agentUuid.Trim()}";
+            var response = await Http.GetFromJsonAsync<Root>(url);
+
+            if (response != null && response.status == 200 && response.data != null)
+            {
+                agentData = response.data;
+            }
+            else
+            {
+                errorMessage = "Agente não encontrado ou resposta inválida da API.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erro ao conectar com a API: {ex.Message}";
+        }
+    }
+}

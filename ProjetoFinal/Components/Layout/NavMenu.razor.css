@@ -46,6 +46,10 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-geo-alt-fill' viewBox='0 0 16 16'%3E%3Cpath d='M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z'/%3E%3C/svg%3E");
 }
 
+.bi-valorant-fill-nav-menu {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'%3E%3Crect x='1.5' y='1.5' width='13' height='13' rx='1' fill='none' stroke='white' stroke-width='1.5'/%3E%3Cpath d='M4.5 4h2l1.5 5 1.5-5h2L9 12H7L4.5 4z' fill='white'/%3E%3C/svg%3E");
+}
+
 .bi-type-j-nav-menu {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-alphabet' viewBox='0 0 16 16'%3E%3Cpath d='M9 3h2v7.5a3.5 3.5 0 0 1-7 0v-1h2v1a1.5 1.5 0 0 0 3 0V3z'/%3E%3C/svg%3E");
 }
