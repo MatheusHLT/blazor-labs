@@ -2,7 +2,68 @@
 
 <PageTitle>Home</PageTitle>
 
-<h2>Olá, seja bem-vindo(a)!</h2>
+<div class="container mt-1 animate__animated animate__fadeIn">
+    @* Seção de Boas-vindas (Jumbotron Moderno) *@
+    <div class="bg-light px-3 pt-3 pb-1 rounded-lg shadow-sm border-start border-primary border-3">
+        <h1 class="display-6 fw-bold text-dark mb-2">Olá, seja bem-vindo(a)!</h1>
+        <p class="lead text-secondary fs-5  ">
+            Este projeto centraliza uma coleção de atividades práticas, utilitários e integrações de APIs desenvolvidas pelo estudante 
+            <span class="text-primary fw-semibold">Matheus Honorato</span> para fins de estudo e consolidação de conceitos em Blazor WebAssembly.
+        </p>
+        <hr class="my-3">
+        <p class="text-muted d-flex align-items-center">
+            <span class="bi bi-arrow-left-circle-fill text-primary me-2 fs-5" aria-hidden="true"></span>
+            Utilize o menu lateral para navegar e explorar os laboratórios práticos disponíveis.
+        </p>
+    </div>
 
-<h5>Este projeto contem atividades práticas realizadas pelo estudante Matheus Honorato para fins de estudo.</h5>
-<h6>Navegue pelas barras laterais.</h6>
+    @* Seção de Visão Geral do Portfólio (Cards Informativos) *@
+    <div class="row g-4 justify-content-center m-2 mt-2">
+        <h3 class="fw-bold text-secondary text-center mb-1">📌 O que você vai encontrar por aqui:</h3>
+        
+        @* Card APIs *@
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 bg-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="bi bi-lightning-charge-fill text-warning fs-3 me-3" aria-hidden="true"></span>
+                        <h5 class="card-title fw-bold m-0 text-dark">Consumo de APIs</h5>
+                    </div>
+                    <p class="card-text text-muted small">
+                        Integrações com serviços reais do mercado, incluindo <strong>PokeAPI</strong>, <strong>BrasilAPI (CEP)</strong>, <strong>ValorantAPI</strong> e <strong>DragonballAPI</strong>, demonstrando manipulação de dados assíncronos.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        @* Card Utilitários *@
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 bg-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="bi bi-gear-wide-connected text-primary fs-3 me-3" aria-hidden="true"></span>
+                        <h5 class="card-title fw-bold m-0 text-dark">Lógica e Algoritmos</h5>
+                    </div>
+                    <p class="card-text text-muted small">
+                        Ferramentas utilitárias com regras de negócio interativas em C#, como a <strong>Calculadora de Média</strong> acadêmica e o <strong>Sorteador Aleatório</strong> dinâmico.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        @* Card Persistência *@
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 bg-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="bi bi-clipboard-check-fill text-success fs-3 me-3" aria-hidden="true"></span>
+                        <h5 class="card-title fw-bold m-0 text-dark">Estado e Persistência</h5>
+                    </div>
+                    <p class="card-text text-muted small">
+                        Aplicações práticas de ciclo de vida do Blazor e manipulação do <strong>localStorage do navegador</strong> usando JavaScript Interop, implementado na <strong>Lista de Tarefas</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
