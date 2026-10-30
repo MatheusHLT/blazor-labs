@@ -1,29 +1,68 @@
 @page "/dragonballapi"
 @rendermode InteractiveWebAssembly
+
 @using ProjetoFinal.Client.Models.DragonballApi
+@using ProjetoFinal.Client.Services
+
 @inject HttpClient Http
+@inject DragonballApiService DragonballApiService
 
 <PageTitle>Dragonball API</PageTitle>
 
-<h2>Consumer API Dragonball</h2>
+<h2>Consulta de Personagens - Dragonball API</h2>
 
 <div class="mb-3">
-    <label for="cepInput" class="form-label">Digite um ID:</label>
-    <input type="text" id="cepInput" class="form-control" @bind="id" />
-</div>
-<button class="btn btn-primary" @onclick="ConsultarCep">Consultar</button>
+    <label for="idInput" class="form-label">Digite um ID:</label>
 
-@if (root != null)
+    <input type="text"
+           id="idInput"
+           class="form-control"
+           @bind="DragonballApiService.Id" />
+</div>
+
+<button class="btn btn-primary"
+        @onclick="ConsultarPersonagem"
+        disabled="@isLoading">
+
+    @if (isLoading)
+    {
+        <span>Consultando...</span>
+    }
+    else
+    {
+        <span>Consultar</span>
+    }
+</button>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3">
+        @errorMessage
+    </div>
+}
+
+@if (DragonballApiService.Personagem != null)
 {
     <div class="mt-3">
-        <p><h4>=== Informações do Personagem ===</h4></p>
-        <p><strong>Nome:</strong> @root.name</p>
-        <p><strong>Planeta:</strong> @(root.originPlanet?.name ?? "Desconhecido")</p>
+        <h4>=== Informações do Personagem ===</h4>
+
+        <p>
+            <strong>Nome:</strong>
+            @DragonballApiService.Personagem.name
+        </p>
+
+        <p>
+            <strong>Planeta:</strong>
+            @(DragonballApiService.Personagem.originPlanet?.name ?? "Desconhecido")
+        </p>
+
         <p><strong>Transformações:</strong></p>
-        @if (root.transformations != null && root.transformations.Any())
+
+        @if (DragonballApiService.Personagem.transformations != null &&
+             DragonballApiService.Personagem.transformations.Any())
         {
             <ul>
-                @foreach (var trans in root.transformations)
+                @foreach (var trans in DragonballApiService.Personagem.transformations)
                 {
                     <li>@trans.name</li>
                 }
@@ -33,43 +72,54 @@
         {
             <p>Nenhuma transformação encontrada.</p>
         }
+
         <h4>================================</h4>
     </div>
 }
-else if (!string.IsNullOrEmpty(errorMessage))
-{
-        <div class="alert alert-danger mt-3">@errorMessage</div>
-}
 
 @code {
-    private string id;
-    private Root root;
-    private string errorMessage;
+    private bool isLoading = false;
+    private string errorMessage = string.Empty;
 
-    private async Task ConsultarCep()
+    private async Task ConsultarPersonagem()
     {
+        isLoading = true;
         errorMessage = string.Empty;
-        root = null;
-
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            errorMessage = "Por favor insira um ID válido.";
-            return;
-        }
 
         try
         {
-            var url = $"https://dragonball-api.com/api/characters/{id}";
-            root = await Http.GetFromJsonAsync<Root>(url);
+            DragonballApiService.LimparPersonagem();
 
-            if (root == null || root.id == 0)
+            await DragonballApiService.ConsultarPersonagem(Http);
+
+            if (DragonballApiService.Personagem == null ||
+                DragonballApiService.Personagem.id == 0)
             {
-                errorMessage = "ID não encontrado";
+                errorMessage = "ID não encontrado.";
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            errorMessage = ex.Message;
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                errorMessage = "Personagem não encontrado.";
+            }
+            else
+            {
+                errorMessage = $"Erro de comunicação com a API: {ex.Message}";
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Ocorreu um erro: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 }

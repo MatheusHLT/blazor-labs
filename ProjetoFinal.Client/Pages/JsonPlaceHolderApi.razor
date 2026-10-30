@@ -1,70 +1,104 @@
 @page "/JSONPlaceholderAPI"
 @rendermode InteractiveWebAssembly
+
 @using ProjetoFinal.Client.Models.JsonPlaceHolderApi
+@using ProjetoFinal.Client.Services
+
 @inject HttpClient Http
+@inject JsonPlaceHolderApiService JsonPlaceHolderApiService
 
 <PageTitle>JSONPlaceholder API</PageTitle>
 
+<h2>Consulta de Usuários - JSONPlaceholder</h2>
+
 <div class="mb-3">
     <label class="form-label">Digite um ID:</label>
-    <input type="text" class="form-control" @bind="id" />
-</div>
-<button class="btn btn-primary" @onclick="ConsultarJph">Consultar</button>
 
-@if (root != null)
+    <input type="text"
+           class="form-control"
+           @bind="JsonPlaceHolderApiService.Id" />
+</div>
+
+<button class="btn btn-primary"
+        @onclick="ConsultarJph"
+        disabled="@isLoading">
+
+    @if (isLoading)
+    {
+        <span>Consultando...</span>
+    }
+    else
+    {
+        <span>Consultar</span>
+    }
+</button>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3">
+        @errorMessage
+    </div>
+}
+
+@if (JsonPlaceHolderApiService.Usuario != null)
 {
     <div class="mt-3">
-        <p>
         <h4>=== Informações da API ===</h4>
+
+        <p>
+            <strong>Nome:</strong>
+            @JsonPlaceHolderApiService.Usuario.name
         </p>
-        <p><strong>Nome:</strong> @root.name</p>
-        <p><strong>Cidade:</strong> @(root.address?.city ?? "Desconhecido")</p>
-        <p><strong>Empresa:</strong> @(root.company?.name ?? "Desconhecido")</p>
+
+        <p>
+            <strong>Cidade:</strong>
+            @(JsonPlaceHolderApiService.Usuario.address?.city ?? "Desconhecido")
+        </p>
+
+        <p>
+            <strong>Empresa:</strong>
+            @(JsonPlaceHolderApiService.Usuario.company?.name ?? "Desconhecido")
+        </p>
+
         <h4>======================</h4>
     </div>
 }
-else if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger mt-3">@errorMessage</div>
-}
 
 @code {
-    private string id;
-    private Root root;
-    private string errorMessage;
+    private bool isLoading = false;
+    private string errorMessage = string.Empty;
 
     private async Task ConsultarJph()
     {
+        isLoading = true;
         errorMessage = string.Empty;
-        root = null;
-
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            errorMessage = "Por favor insira um ID válido.";
-            return;
-        }
 
         try
         {
-            var url = "https://jsonplaceholder.typicode.com/users";
-            var users = await Http.GetFromJsonAsync<List<Root>>(url);
+            JsonPlaceHolderApiService.LimparUsuario();
 
-            if (users != null)
+            await JsonPlaceHolderApiService.ConsultarUsuario(Http);
+
+            if (JsonPlaceHolderApiService.Usuario == null)
             {
-                if (int.TryParse(id, out int numericId))
-                {
-                    root = users.FirstOrDefault(u => u.id == numericId);
-                }
-
-                if (root == null)
-                {
-                    errorMessage = "ID não encontrado na lista.";
-                }
+                errorMessage = "ID não encontrado na lista.";
             }
+        }
+        catch (ArgumentException ex)
+        {
+            errorMessage = ex.Message;
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = $"Erro de comunicação com a API: {ex.Message}";
         }
         catch (Exception ex)
         {
             errorMessage = $"Ocorreu um erro: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 }

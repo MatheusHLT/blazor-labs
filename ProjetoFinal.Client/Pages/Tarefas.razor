@@ -1,6 +1,10 @@
 @page "/tarefas"
 @rendermode InteractiveWebAssembly
 
+@using ProjetoFinal.Client.Services
+
+@inject TarefaService TarefaService
+
 <PageTitle>Lista de Tarefas</PageTitle>
 
 <h1>Lista de Tarefas</h1>
@@ -28,7 +32,7 @@
 <p>Total de letras em todas as tarefas: @TotalDeLetras()</p>
 
 @code {
-    List<string> tarefas = new List<string>();
+    List<string> tarefas => TarefaService.Tarefas;
     string novaTarefa = "";
     string erro = "";
 

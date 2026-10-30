@@ -1,7 +1,12 @@
+
 @page "/pokeapi"
 @rendermode InteractiveWebAssembly
+
 @using ProjetoFinal.Client.Models.PokeApi
+@using ProjetoFinal.Client.Services
+
 @inject HttpClient Http
+@inject PokeApiService PokeApiService
 
 <PageTitle>Buscar Pokémon</PageTitle>
 
@@ -9,10 +14,16 @@
 
 <div class="mb-3">
     <label for="pokemonName">Nome do Pokémon:</label>
-    <input id="pokemonName" class="form-control" style="max-width: 400px;" @bind="searchName" placeholder="Digite o nome do Pokémon (ex: ditto)" />
+    <input id="pokemonName"
+           class="form-control"
+           style="max-width: 400px;"
+           @bind="PokeApiService.SearchName"
+           placeholder="Digite o nome do Pokémon (ex: ditto)" />
 </div>
 
-<button class="btn btn-primary" @onclick="BuscarPokemon">Buscar Pokémon</button>
+<button class="btn btn-primary" @onclick="BuscarPokemon">
+    Buscar Pokémon
+</button>
 
 @if (isLoading)
 {
@@ -22,48 +33,48 @@ else if (!string.IsNullOrEmpty(errorMessage))
 {
     <p class="mt-3 text-danger">@errorMessage</p>
 }
-else if (pokemon != null)
+else if (PokeApiService.Pokemon != null)
 {
     <div class="mt-4">
         <h2>Detalhes do Pokémon</h2>
-        
-        <img src="@pokemon.Sprites.Other.OfficialArtwork.FrontDefault" alt="@pokemon.Name" style="max-width: 200px;" />
-        
-        <p><strong>ID:</strong> @pokemon.Id</p>
-        <p><strong>Nome:</strong> @pokemon.Name</p>
-        <p><strong>Altura:</strong> @(pokemon.Height / 10.0) m</p>
-        <p><strong>Peso:</strong> @(pokemon.Weight / 10.0) kg</p>
+
+        <img src="@PokeApiService.Pokemon.Sprites.Other.OfficialArtwork.FrontDefault"
+             alt="@PokeApiService.Pokemon.Name"
+             style="max-width: 200px;" />
+
+        <p><strong>ID:</strong> @PokeApiService.Pokemon.Id</p>
+        <p><strong>Nome:</strong> @PokeApiService.Pokemon.Name</p>
+        <p><strong>Altura:</strong> @(PokeApiService.Pokemon.Height / 10.0) m</p>
+        <p><strong>Peso:</strong> @(PokeApiService.Pokemon.Weight / 10.0) kg</p>
     </div>
 }
 
 @code {
-    private string searchName = string.Empty;
-    private Pokemon? pokemon;
     private bool isLoading = false;
     private string? errorMessage;
 
     private async Task BuscarPokemon()
     {
-        if (string.IsNullOrWhiteSpace(searchName))
+        if (string.IsNullOrWhiteSpace(PokeApiService.SearchName))
         {
             return;
         }
 
         isLoading = true;
         errorMessage = null;
-        pokemon = null;
 
         try
         {
-            string url = $"https://pokeapi.co/api/v2/pokemon/{searchName.ToLower().Trim()}";
-            pokemon = await Http.GetFromJsonAsync<Pokemon>(url);
+            await PokeApiService.BuscarPokemon(Http);
         }
         catch (HttpRequestException)
         {
+            PokeApiService.LimparPokemon();
             errorMessage = "Pokémon não encontrado. Verifique o nome digitado.";
         }
         catch (Exception ex)
         {
+            PokeApiService.LimparPokemon();
             errorMessage = $"Ocorreu um erro: {ex.Message}";
         }
         finally
